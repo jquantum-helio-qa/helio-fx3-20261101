@@ -1,0 +1,57 @@
+# helio-fx3 (qa-scenario slice 3, 1 Nov 2026): owned real-GitHub provider lane, two gated environments.
+# Helio dispatch contract: workflow_dispatch with `environment` and `helio_execution_id` inputs, run-name echo.
+# Nothing is deployed and no secret is used. Every commit to this repository gets a helio/workflow/<sha> tag.
+name: helio-fx3
+run-name: ${{ inputs.helio_execution_id || github.run_id }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        required: false
+        default: qs-test
+        options: [qs-test, qs-production]
+      helio_execution_id:
+        type: string
+        required: false
+        default: ''
+      helio_release_id:
+        type: string
+        required: false
+        default: ''
+      workflow_revision:
+        type: string
+        required: false
+        default: ''
+      release_version:
+        type: string
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: qs-test
+    steps:
+      - name: Synthetic test work
+        shell: bash
+        run: |
+          echo "helio-fx3 test run=$GITHUB_RUN_ID attempt=$GITHUB_RUN_ATTEMPT"
+          sleep 5
+
+  production:
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: qs-production
+    steps:
+      - name: Synthetic production work
+        shell: bash
+        run: |
+          echo "helio-fx3 production run=$GITHUB_RUN_ID attempt=$GITHUB_RUN_ATTEMPT"
+          sleep 5
